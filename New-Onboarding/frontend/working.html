@@ -372,7 +372,7 @@ input[type="number"]::-webkit-inner-spin-button {
     
     <div class="container">
         <div class="header">
-            <!-- <img src="image.png" alt="Company Logo" class="company-logo"> -->
+        <img src="Astolite_Logo-removebg-preview.png" alt="Company Logo" class="company-logo"> 
             <h1>Employee Onboarding Form</h1>
             <p>Please complete all sections of this form to finalize your onboarding process</p>
         </div>
@@ -408,7 +408,7 @@ input[type="number"]::-webkit-inner-spin-button {
                         </div>
                     </div>  
                     <div class="form-col">
-                        <label for="emp_alt_mobile">Alternate Mobile Number(Optinal)</label>
+                        <label for="emp_alt_mobile">Alternate Mobile Number(Optional)</label>
                         <div class="form-group">
                             <input type="text" id="emp_alt_mobile" placeholder="Alternative Mobile Number" name="emp_alt_mobile" maxlength="10">
                             <div id="emp_alt_mobile-error" class="validation-message"></div>
@@ -633,7 +633,7 @@ input[type="number"]::-webkit-inner-spin-button {
                 </div>
                 <div class="form-row">
                     <div class="form-col">
-                        <label for="emp_joining_date" class="required">Imediate Joining Date</label>
+                        <label for="emp_joining_date" class="required">Immediate Joining Date</label>
                         <div class="form-group">
                             <input type="date" id="emp_joining_date" name="emp_joining_date" required>
                             <div id="joining-error" class="validation-message"></div>
@@ -925,7 +925,7 @@ input[type="number"]::-webkit-inner-spin-button {
         document.addEventListener('DOMContentLoaded', function() {
             // Updated regex patterns based on requirements
             const nameRegex = /^[A-Za-z]{3,60}$/; 
-            const emailRegex = /^[a-zA-Z0-9]+([._-][a-zA-Z0-9]+)*@(gmail|outlook)\.(com|in|org|co)$/;
+            const emailRegex = /^[a-zA-Z0-9]{1}(?:[a-zA-Z0-9]+[._-]?)*[a-zA-Z0-9]{1}@(gmail|outlook)\.(com|in|org|co)$/;
             const mobileRegex = /^[6789]\d{9}$/;
             const addressRegex = /^[A-Za-z0-9][A-Za-z0-9\s,.\-\/#]{2,78}[A-Za-z0-9]$/; 
             const cityRegex = /^[A-Za-z]{3,60}$/; 
@@ -1131,6 +1131,7 @@ input[type="number"]::-webkit-inner-spin-button {
                         validateEducationYearSequence();
                         return true;
                     case 'emp_mobile': return validateMobile();
+
                     case 'emp_address': return validateAddress();
                     case 'emp_city': return validateCity();
                     case 'emp_state': return validateState();
@@ -1174,71 +1175,103 @@ input[type="number"]::-webkit-inner-spin-button {
             }
         
             // Validate education year sequence with strict year requirements
-            function validateEducationYearSequence() {
-                const sscYear = document.getElementById('ssc_year').value;
-                const interYear = document.getElementById('inter_year').value;
-                const gradYear = document.getElementById('grad_year').value;
-                const currentYear = indiaNow.getFullYear();
-                
-                // Validate SSC year is at least 12 years after birth
-                const dob = document.getElementById('emp_dob').value;
-                if (dob && sscYear) {
-                    const dobYear = new Date(dob).getFullYear();
-                    const minSSCYear = dobYear + 12;
-                    
-                    if (parseInt(sscYear) < minSSCYear) {
-                        showError(document.getElementById('ssc_year'), 
-                                 document.getElementById('ssc-year-error'), 
-                                 `SSC must be completed at least 12 years after birth (minimum year: ${minSSCYear})`);
-                        return false;
-                    }
-                }
-// Validate Intermediate: must be 2 or 3 years after SSC
-if (sscYear && interYear) {
-    const sscYearInt = parseInt(sscYear);
-    const interYearInt = parseInt(interYear);
+          // Validate education year sequence with flexible year requirements
+function validateEducationYearSequence() {
+    const sscYear = document.getElementById('ssc_year').value;
+    const interYear = document.getElementById('inter_year').value;
+    const gradYear = document.getElementById('grad_year').value;
+    const currentYear = indiaNow.getFullYear();
 
-    const allowedInterYears = [sscYearInt + 2, sscYearInt + 3];
-    if (!allowedInterYears.includes(interYearInt)) {
-        showError(document.getElementById('inter_year'),
-            document.getElementById('inter-year-error'),
-            `Intermediate must be 2 or 3 years after SSC (expected: ${sscYearInt + 2} or ${sscYearInt + 3})`);
-        return false;
+    // Validate SSC year is at least 12 years after birth
+    const dob = document.getElementById('emp_dob').value;
+    if (dob && sscYear) {
+        const dobYear = new Date(dob).getFullYear();
+        const minSSCYear = dobYear + 12;
+
+        if (parseInt(sscYear) < minSSCYear) {
+            showError(document.getElementById('ssc_year'),
+                      document.getElementById('ssc-year-error'),
+                      `SSC must be completed at least 12 years after birth (minimum year: ${minSSCYear})`);
+            return false;
+        }
+
+        // SSC year should not be in the future beyond a reasonable limit
+        if (parseInt(sscYear) > currentYear + 2) {
+            showError(document.getElementById('ssc_year'),
+                      document.getElementById('ssc-year-error'),
+                      `SSC year cannot be after ${currentYear + 2}`);
+            return false;
+        }
+
+        // SSC year should not be too far in the past
+        if (parseInt(sscYear) < currentYear - 50) {
+            showError(document.getElementById('ssc_year'),
+                      document.getElementById('ssc-year-error'),
+                      'SSC year is too far in the past');
+            return false;
+        }
     }
-}
-// Validate Graduation: must be 3, 4, or 5 years after Intermediate
-if (interYear && gradYear) {
-    const interYearInt = parseInt(interYear);
-    const gradYearInt = parseInt(gradYear);
 
-    const allowedGradYears = [interYearInt + 3, interYearInt + 4, interYearInt + 5];
-    if (!allowedGradYears.includes(gradYearInt)) {
-        showError(document.getElementById('grad_year'),
-            document.getElementById('grad-year-error'),
-            `Graduation must be 3 to 5 years after Intermediate (expected: ${interYearInt + 3}, ${interYearInt + 4}, or ${interYearInt + 5})`);
-        return false;
+    // Validate Intermediate: must be at least 2 years after SSC
+    if (sscYear && interYear) {
+        const sscYearInt = parseInt(sscYear);
+        const interYearInt = parseInt(interYear);
+
+        if (interYearInt < sscYearInt + 2) {
+            showError(document.getElementById('inter_year'),
+                      document.getElementById('inter-year-error'),
+                      `Intermediate must be at least 2 years after SSC (minimum year: ${sscYearInt + 2})`);
+            return false;
+        }
+
+        // Intermediate year should not be in the future beyond a reasonable limit
+        if (interYearInt > currentYear + 2) {
+            showError(document.getElementById('inter_year'),
+                      document.getElementById('inter-year-error'),
+                      `Intermediate year cannot be after ${currentYear + 2}`);
+            return false;
+        }
+
+        // Intermediate year should not be too far in the past
+        if (interYearInt < currentYear - 50) {
+            showError(document.getElementById('inter_year'),
+                      document.getElementById('inter-year-error'),
+                      'Intermediate year is too far in the past');
+            return false;
+        }
     }
-}
 
-                // Validate Graduation is not more than 2 years in future
-                if (gradYear && parseInt(gradYear) > (currentYear + 2)) {
-                    showError(document.getElementById('grad_year'), 
-                             document.getElementById('grad-year-error'), 
-                             `Graduation year cannot be after ${currentYear + 2}`);
-                    return false;
-                }
-                
-                // Validate Graduation is not too far in past
-                if (gradYear && parseInt(gradYear) < currentYear - 50) {
-                    showError(document.getElementById('grad_year'), 
-                             document.getElementById('grad-year-error'), 
-                             'Graduation year is too far in the past');
-                    return false;
-                }
-                
-                return true;
-            }
-            
+    // Validate Graduation: must be at least 3 years after Intermediate
+    if (interYear && gradYear) {
+        const interYearInt = parseInt(interYear);
+        const gradYearInt = parseInt(gradYear);
+
+        if (gradYearInt < interYearInt + 3) {
+            showError(document.getElementById('grad_year'),
+                      document.getElementById('grad-year-error'),
+                      `Graduation must be at least 3 years after Intermediate (minimum year: ${interYearInt + 3})`);
+            return false;
+        }
+
+        // Graduation year should not be in the future beyond a reasonable limit
+        if (gradYearInt > currentYear + 2) {
+            showError(document.getElementById('grad_year'),
+                      document.getElementById('grad-year-error'),
+                      `Graduation year cannot be after ${currentYear + 2}`);
+            return false;
+        }
+
+        // Graduation year should not be too far in the past
+        if (gradYearInt < currentYear - 50) {
+            showError(document.getElementById('grad_year'),
+                      document.getElementById('grad-year-error'),
+                      'Graduation year is too far in the past');
+            return false;
+        }
+    }
+
+    return true;
+}
             // Enhanced grade validation (4-100 for %, 4-10 for CGPA)
             function validateGradeField(input, errorId) {
                 const error = document.getElementById(errorId);
@@ -1354,7 +1387,7 @@ if (interYear && gradYear) {
                         submitBtn.disabled = true;
                         submitBtn.textContent = 'Submitting...';
         
-                        const response = await fetch('http://54.166.206.245:3000/save-employee', {
+                        const response = await fetch('http://44.223.23.145:3420/save-employee', {
                             method: 'POST',
                             body: formData
                         });
@@ -1437,27 +1470,46 @@ if (interYear && gradYear) {
                 return true;
             }
         
-            function validateEmail() {
-                const email = document.getElementById('emp_email');
-                const error = document.getElementById('email-error');
-                const value = email.value.trim().toLowerCase();
 
-                const allowedDomains = ['@gmail.com', '@outlook.com'];
-                const emailRegex = /^[a-zA-Z0-9._%+-]+@(gmail\.com|outlook\.com)$/;
 
-                if (!value) {
-                    showError(email, error, 'Email address is required');
-                    return false;
-                }
 
-                if (!emailRegex.test(value)) {
-                    showError(email, error, 'Email must be a valid Gmail or Outlook address');
-                    return false;
-                }
+function validateEmail() {
+    const email = document.getElementById('emp_email');
+    const error = document.getElementById('email-error');
+    const value = email.value.trim().toLowerCase();
 
-                showSuccess(email, error);
-                return true;
-            }
+    // Check minimum 3 characters before @
+    const atIndex = value.indexOf('@');
+    if (atIndex < 3) {
+        showError(email, error, 'Must have at least 3 characters before @');
+        return false;
+    }
+
+    // Check no consecutive special characters
+    if (/([._-])\1/.test(value)) {
+        showError(email, error, 'Cannot have consecutive special characters');
+        return false;
+    }
+
+    // Check doesn't start with special character
+    if (/^[._-]/.test(value)) {
+        showError(email, error, 'Cannot start with special character');
+        return false;
+    }
+
+    if (!value) {
+        showError(email, error, 'Email address is required');
+        return false;
+    }
+
+    if (!emailRegex.test(value)) {
+        showError(email, error, 'Email must be a valid Gmail or Outlook address (e.g. user.name@gmail.com)');
+        return false;
+    }
+
+    showSuccess(email, error);
+    return true;
+}
         
             function validateDOB() {
                 const dob = document.getElementById('emp_dob');
@@ -1502,6 +1554,19 @@ if (interYear && gradYear) {
                 return true;
             }
         
+            function validateAltMobile() {
+    const altMobile = document.getElementById('emp_alt_mobile');
+    const error = document.getElementById('emp_alt_mobile-error');
+    const value = cleanInput(altMobile);
+    
+    if (value && !mobileRegex.test(value)) {
+        showError(altMobile, error, 'Please enter a valid 10-digit mobile number starting with 6-9');
+        return false;
+    }
+    
+    showSuccess(altMobile, error);
+    return true;
+}
             function validateAddress() {
                 const address = document.getElementById('emp_address');
                 const error = document.getElementById('address-error');
@@ -1910,26 +1975,28 @@ function validatePF() {
     showSuccess(pf, error);
     return true;
 }
-            function validateJoiningDate() {
-                const joiningDate = document.getElementById('emp_joining_date');
-                const error = document.getElementById('joining-error');
-                
-                if (!joiningDate.value) {
-                    showError(joiningDate, error, 'Joining date is required');
-                    return false;
-                }
-                
-                const joinDate = new Date(joiningDate.value);
-                const minDate = new Date(indiaNow);
-                
-                if (joinDate < minDate) {
-                    showError(joiningDate, error, 'Joining date cannot be in the past');
-                    return false;
-                }
-                
-                showSuccess(joiningDate, error);
-                return true;
-            }
+           function validateJoiningDate() {
+    const joiningDate = document.getElementById('emp_joining_date');
+    const error = document.getElementById('joining-error');
+    
+    if (!joiningDate.value) {
+        showError(joiningDate, error, 'Joining date is required');
+        return false;
+    }
+    
+    const joinDate = new Date(joiningDate.value);
+    const today = new Date(indiaNow);
+    today.setHours(0, 0, 0, 0);
+    
+    // Allow today and future dates
+    if (joinDate < today) {
+        showError(joiningDate, error, 'Joining date cannot be in the past');
+        return false;
+    }
+    
+    showSuccess(joiningDate, error);
+    return true;
+}
         
             function validateSSCSchool() {
                 const school = document.getElementById('ssc_school');

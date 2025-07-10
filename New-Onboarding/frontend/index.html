@@ -102,7 +102,6 @@
         
         .required:after {
             content: " *";
-            /* color: var(--accent-color); */
             color: red;
         }
         
@@ -612,6 +611,9 @@ input[type="number"]::-webkit-inner-spin-button {
                                     <option value="Machine Learning Engineer">Machine Learning Engineer</option>
                                     <option value="Project Manager">Project Manager</option>
                                     <option value="Full Stack Developer">Full Stack Developer</option>
+                                    <option value="Accounting">Accounting</option>
+                                    <option value="Human Resource">Human Resource</option>
+                                    <option value="Administration">Administration</option>
                             </select>
                             <div id="job-error" class="validation-message">Please select a job role</div>
                         </div>
@@ -679,7 +681,7 @@ input[type="number"]::-webkit-inner-spin-button {
                                 <label for="emp_uan" class="required">UAN Number</label>
                                 <div class="form-group">
                                     <input type="text" id="emp_uan" name="emp_uan" placeholder="Enter UAN number" maxlength="12" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-                                    <div id="uan-error" class="validation-message">Please enter a valid 12-digit UAN number</div>
+                                    <div id="uan-error" class="validation-message">Please enter a valid 12-digit UAN number (cannot start with 0)</div>
                                 </div>
                             </div>
                             <div class="form-col">
@@ -699,7 +701,7 @@ input[type="number"]::-webkit-inner-spin-button {
                                 </div>
                             </div>
                             <div class="form-col">
-                                <label for="emp_relieving_letter">Relieving Letter (PDF only)</label>
+                                <label for="emp_relieving_letter" class="required">Relieving Letter (PDF only)</label>
                                 <div class="form-group">
                                     <input type="file" id="emp_relieving_letter" name="emp_relieving_letter" accept=".pdf">
                                     <div id="relieving-letter-error" class="validation-message">Please upload a PDF file (max 2MB)</div>
@@ -708,7 +710,7 @@ input[type="number"]::-webkit-inner-spin-button {
                         </div>
                         <div class="form-row">
                             <div class="form-col">
-                                <label for="emp_experience_certificate">Experience Certificate (PDF only)</label>
+                                <label for="emp_experience_certificate"  class="required">Experience Certificate (PDF only)</label>
                                 <div class="form-group">
                                     <input type="file" id="emp_experience_certificate" name="emp_experience_certificate" accept=".pdf">
                                     <div id="experience-cert-error" class="validation-message">Please upload a PDF file (max 2MB)</div>
@@ -936,7 +938,7 @@ input[type="number"]::-webkit-inner-spin-button {
             const bankBranchRegex = /^[A-Za-z]{3,60}$/; 
             const companyRegex = /^[A-Za-z][A-Za-z\s-]{1,58}[A-Za-z]$/; 
             const expYearsRegex = /^([0-3]?\d)(\.\d{1,2})?$/; 
-        
+            const aadhaarRegex = /^[1-9]\d{11}$/;
             const schoolRegex = /^[A-Za-z]+(?:[ \-][A-Za-z]+)*$/;  
             const yearRegex = /^(19|20)\d{2}$/;
             const gradeRegex = /^(?:[4-9]|\d{2}|100)(?:\.\d{1,2})?$/;
@@ -946,7 +948,7 @@ input[type="number"]::-webkit-inner-spin-button {
             const imageRegex = /\.(jpg|jpeg|png)$/i;
             const docRegex = /\.(doc|docx)$/i;
             const altMobileRegex = /^[6789]\d{9}$/;
-            const uanRegex = /^\d{12}$/; // 12-digit UAN number
+            const uanRegex = /^[1-9]\d{11}$/;
             const pfRegex = /^[A-Z]{2}\/[A-Z]{3}\/\d{7}$/i;
             
             // Get current date in IST (India Standard Time)
@@ -961,7 +963,7 @@ input[type="number"]::-webkit-inner-spin-button {
             
             joiningDateInput.min = formatDateForInput(indiaNow);
             joiningDateInput.max = formatDateForInput(sixMonthsLater);
-            joiningDateInput.value = formatDateForInput(indiaNow);
+            // Removed: joiningDateInput.value = formatDateForInput(indiaNow);
             
             // Set DOB range (20-60 years)
             const dobInput = document.getElementById('emp_dob');
@@ -1131,14 +1133,14 @@ input[type="number"]::-webkit-inner-spin-button {
                         validateEducationYearSequence();
                         return true;
                     case 'emp_mobile': return validateMobile();
-
+                    case 'emp_alt_mobile': return validateAltMobile();
+                    case 'emp_aadhaar': return validateAadhaar();
                     case 'emp_address': return validateAddress();
                     case 'emp_city': return validateCity();
                     case 'emp_state': return validateState();
                     case 'emp_zipcode': return validateZipcode();
                     case 'emp_bank': return validateBank();
                     case 'emp_account': return validateAccount();
-                    case 'emp_alt_mobile': return validateAltMobile();
                     case 'emp_uan': return validateUAN();
                     case 'emp_pf': return validatePF();
                     case 'emp_ifsc': return validateIFSC();
@@ -1174,8 +1176,7 @@ input[type="number"]::-webkit-inner-spin-button {
                 }
             }
         
-            // Validate education year sequence with strict year requirements
-          // Validate education year sequence with flexible year requirements
+            // Validate education year sequence with flexible year requirements
 function validateEducationYearSequence() {
     const sscYear = document.getElementById('ssc_year').value;
     const interYear = document.getElementById('inter_year').value;
@@ -1470,9 +1471,6 @@ function validateEducationYearSequence() {
                 return true;
             }
         
-
-
-
 function validateEmail() {
     const email = document.getElementById('emp_email');
     const error = document.getElementById('email-error');
@@ -1539,6 +1537,7 @@ function validateEmail() {
                 const mobile = document.getElementById('emp_mobile');
                 const error = document.getElementById('mobile-error');
                 const value = cleanInput(mobile);
+                const altMobile = document.getElementById('emp_alt_mobile').value;
                 
                 if (!value) {
                     showError(mobile, error, 'Mobile number is required');
@@ -1549,24 +1548,88 @@ function validateEmail() {
                     showError(mobile, error, 'Please enter a valid 10-digit mobile number starting with 6-9');
                     return false;
                 }
+
+                if (altMobile && value === altMobile) {
+                    showError(mobile, error, 'Mobile number must be different from alternate mobile number');
+                    return false;
+                }
                 
                 showSuccess(mobile, error);
                 return true;
             }
         
             function validateAltMobile() {
-    const altMobile = document.getElementById('emp_alt_mobile');
-    const error = document.getElementById('emp_alt_mobile-error');
-    const value = cleanInput(altMobile);
-    
-    if (value && !mobileRegex.test(value)) {
-        showError(altMobile, error, 'Please enter a valid 10-digit mobile number starting with 6-9');
-        return false;
-    }
-    
-    showSuccess(altMobile, error);
-    return true;
-}
+                const altMobile = document.getElementById('emp_alt_mobile');
+                const error = document.getElementById('emp_alt_mobile-error');
+                const value = cleanInput(altMobile);
+                const mobile = document.getElementById('emp_mobile').value;
+                
+                if (value && !mobileRegex.test(value)) {
+                    showError(altMobile, error, 'Please enter a valid 10-digit mobile number starting with 6-9');
+                    return false;
+                }
+                
+                if (value && mobile && value === mobile) {
+                    showError(altMobile, error, 'Alternate mobile number must be different from mobile number');
+                    return false;
+                }
+                
+                showSuccess(altMobile, error);
+                return true;
+            }
+            
+            function validateAadhaar() {
+                const aadhaar = document.getElementById('emp_aadhaar');
+                const error = document.getElementById('emp_aadhaar-error');
+                let value = cleanInput(aadhaar).replace(/\D/g, '');
+                
+                if (value.length > 12) {
+                    value = value.slice(0, 12);
+                }
+                aadhaar.value = value;
+                
+                if (!value) {
+                    showError(aadhaar, error, 'Aadhaar number is required');
+                    return false;
+                }
+                
+                if (value.length !== 12) {
+                    showError(aadhaar, error, 'Aadhaar must be exactly 12 digits');
+                    return false;
+                }
+                
+                if (!aadhaarRegex.test(value)) {
+                    showError(aadhaar, error, 'Aadhaar must be 12 digits starting with 1-9');
+                    return false;
+                }
+                
+                showSuccess(aadhaar, error);
+                return true;
+            }
+
+            function validatePAN(input) {
+                const error = document.getElementById('emp_pan-error');
+                let value = cleanInput(input).toUpperCase().replace(/[^A-Z0-9]/g, '');
+                
+                if (value.length > 10) {
+                    value = value.slice(0, 10);
+                }
+                input.value = value;
+                
+                if (!value) {
+                    showError(input, error, 'PAN number is required');
+                    return false;
+                }
+                
+                if (!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(value)) {
+                    showError(input, error, 'PAN must be 10 alphanumeric characters (e.g., ABCDE1234F)');
+                    return false;
+                }
+                
+                showSuccess(input, error);
+                return true;
+            }
+            
             function validateAddress() {
                 const address = document.getElementById('emp_address');
                 const error = document.getElementById('address-error');
@@ -1593,54 +1656,7 @@ function validateEmail() {
                 showSuccess(address, error);
                 return true;
             }
-            const aadhaarInput = document.getElementById('emp_aadhaar');
-    const panInput = document.getElementById('emp_pan');
-
-    // Function to validate Aadhaar input
-    function validateAadhaar(input) {
-        let cleaned = input.value.replace(/\D/g, ''); // Only digits
-        if (cleaned.startsWith('0')) {
-            cleaned = cleaned.substring(1); // Remove leading 0
-        }
-        if (cleaned.length > 12) {
-            cleaned = cleaned.slice(0, 12); // Max 12 digits
-        }
-        input.value = cleaned;
-    }
-
-    // Function to validate PAN input
-    function validatePAN(input) {
-    const errorDiv = document.getElementById("emp_pan-error");
-    let cleaned = input.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-
-    // Limit to 10 characters
-    if (cleaned.length > 10) {
-        cleaned = cleaned.slice(0, 10);
-    }
-
-    input.value = cleaned;
-
-    // Basic pattern validation
-    const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
-
-    if (
-        cleaned.length !== 10 ||
-        !panRegex.test(cleaned) ||
-        /^0+$/.test(cleaned) ||
-        /^1+$/.test(cleaned) ||
-        /^A{10}$/.test(cleaned)
-    ) {
-        errorDiv.style.display = "block";
-    } else {
-        errorDiv.style.display = "none";
-    }
-}
-
-
-    // Event listeners
-    aadhaarInput.addEventListener('input', () => validateAadhaar(aadhaarInput));
-    panInput.addEventListener('input', () => validatePAN(panInput));
-    
+            
             function validateCity() { 
                 const city = document.getElementById('emp_city');
                 const error = document.getElementById('city-error');
@@ -1698,29 +1714,28 @@ function validateEmail() {
             }
         
             function validateBank() {
-    const bank = document.getElementById('emp_bank');
-    const error = document.getElementById('bank-error');
-    const value = cleanAndCapitalizeName(bank);
+                const bank = document.getElementById('emp_bank');
+                const error = document.getElementById('bank-error');
+                const value = cleanAndCapitalizeName(bank);
 
-    if (!value) {
-        showError(bank, error, 'Bank name is required');
-        return false;
-    }
+                if (!value) {
+                    showError(bank, error, 'Bank name is required');
+                    return false;
+                }
 
-    if (value.length < 3) {
-        showError(bank, error, 'Bank name must be at least 3 characters long');
-        return false;
-    }
+                if (value.length < 3) {
+                    showError(bank, error, 'Bank name must be at least 3 characters long');
+                    return false;
+                }
 
-    if (!bankRegex.test(value)) {
-        showError(bank, error, 'Please enter a valid bank name (alphabets only, no numbers or special characters)');
-        return false;
-    }
+                if (!bankRegex.test(value)) {
+                    showError(bank, error, 'Please enter a valid bank name (alphabets only, no numbers or special characters)');
+                    return false;
+                }
 
-    showSuccess(bank, error);
-    return true;
-}
-
+                showSuccess(bank, error);
+                return true;
+            }
         
             function validateAccount() {
                 const account = document.getElementById('emp_account');
@@ -1811,7 +1826,7 @@ function validateEmail() {
                 const error = document.getElementById('dept-error');
                 
                 if (!dept.value) {
-                    showError(dept, error, 'Please select a department');
+                     showError(dept, error, 'Please select a department');
                     return false;
                 }
                 
@@ -1921,7 +1936,10 @@ function validateEmail() {
         showError(uan, error, 'UAN must be exactly 12 digits');
         return false;
     }
-
+     if (!/^[1-9][0-9]{11}$/.test(value)) {
+        showError(uan, error, 'UAN must be 12 digits and must not start with 0');
+        return false;
+    }
     if (value === '000000000000') {
         showError(uan, error, 'UAN number cannot be all zeros');
         return false;
