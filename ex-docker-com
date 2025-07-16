@@ -36,7 +36,7 @@ services:
     container_name: postgres-db
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: admin123
+      POSTGRES_PASSWORD: admin321
       POSTGRES_DB: onboarding
     ports:
       - "5409:5432"
