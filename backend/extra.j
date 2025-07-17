@@ -14,11 +14,11 @@ const PORT = process.env.PORT || 3408;
 app.use(cors({
   origin: [
     process.env.FRONTEND_URL,
-    "http://13.48.203.134:8029",
-    "http://13.48.203.134:3408",
-    "http://13.48.203.134:5500",
-    "http://13.48.203.134:5500",
-    "http://13.48.203.134:8030",
+    "http://13.60.205.60:8029",
+    "http://13.60.205.60:3408",
+    "http://13.60.205.60:5500",
+    "http://13.60.205.60:5500",
+    "http://13.60.205.60:8030",
     "http://employee-frontend:80",
     "http://hr-frontend:80"
   ],
